@@ -150,17 +150,39 @@ Capistrano::Configuration.instance(true).load do |configuration|
             set :branch, newStagingTag
         end
 
-        desc "Push the passed staging tag to production. Pass in tag to deploy with '-s tag=staging-YYYY-MM-DD.X'."
+        desc "Push the head of master to production."
         task :tag_production do
-            promoteToProductionTag = configuration[:tag]
-            raise "Staging tag required; use '-s tag=staging-YYYY-MM-DD.X'" unless promoteToProductionTag
-            raise "Staging tag required; use '-s tag=staging-YYYY-MM-DD.X'" unless promoteToProductionTag =~ /staging-.*/
-            raise "Staging Tag #{promoteToProductionTag} does not exist." unless last_tag_matching(promoteToProductionTag)
-            
-            promoteToProductionTag =~ /staging-([0-9]{4}-[0-9]{2}-[0-9]{2}\.[0-9]*)/
-            newProductionTag = "production-#{$1}"
-            puts "promoting staging tag #{promoteToProductionTag} to production as '#{newProductionTag}'"
-            system "git tag -a -m 'tagging current code for deployment to production' #{newProductionTag} #{promoteToProductionTag}"
+
+            system 'git checkout master'
+            if $? != 0
+                raise "git checkout of master failed"
+            end
+
+            # find latest production tag for today
+            newTagDate = Date.today.to_s 
+            newTagSerial = 1
+
+            lastProductionTag = last_tag_matching("production-#{newTagDate}.*")
+            if lastProductionTag
+                # calculate largest serial and increment
+                lastProductionTag =~ /staging-[0-9]{4}-[0-9]{2}-[0-9]{2}\.([0-9]*)/
+                newTagSerial = $1.to_i + 1
+            end
+            newProductionTag = "production-#{newTagDate}.#{newTagSerial}"
+
+            shaOfCurrentCheckout = `git log --pretty=format:%H HEAD -1`
+            shaOfLastProductionTag = nil
+            if lastProductionTag
+                shaOfLastProductionTag = `git log --pretty=format:%H #{lastProductionTag} -1`
+            end
+
+            if shaOfLastProductionTag == shaOfCurrentCheckout
+                puts "Not re-tagging production because the most recent tag (#{lastProductionTag}) already points to current head of the master branch."
+                newProductionTag = lastProductionTag
+            else
+                puts "Tagging current head of the master branch for deployment to production as '#{newProductionTag}'"
+                system "git tag -a -m 'tagging current code for deployment to production' #{newProductionTag}"
+            end
 
             set :branch, newProductionTag
         end
