@@ -18,6 +18,10 @@ Capistrano::Configuration.instance(true).load do |configuration|
             return lastTag
         end
 
+        def last_dev_tag()
+            return last_tag_matching('dev-*')
+        end
+
         def last_staging_tag()
             return last_tag_matching('staging-*')
         end
@@ -82,6 +86,38 @@ Capistrano::Configuration.instance(true).load do |configuration|
             puts command
             system command
         end
+
+        desc "Mark the current code as a dev release"
+        task :tag_dev do
+            # find latest dev tag for today
+            newTagDate = Date.today.to_s 
+            newTagSerial = 1
+
+            lastDevTag = last_tag_matching("dev-#{newTagDate}.*")
+            if lastDevTag
+                # calculate largest serial and increment
+                lastDevTag =~ /staging-[0-9]{4}-[0-9]{2}-[0-9]{2}\.([0-9]*)/
+                newTagSerial = $1.to_i + 1
+            end
+            newDevTag = "dev-#{newTagDate}.#{newTagSerial}"
+
+            shaOfCurrentCheckout = `git log --pretty=format:%H HEAD -1`
+            shaOfLastDevTag = nil
+            if lastDevTag
+                shaOfLastDevTag = `git log --pretty=format:%H #{lastDevTag} -1`
+            end
+
+            if shaOfLastDevTag == shaOfCurrentCheckout
+                puts "Not re-tagging dev because the most recent tag (#{lastDevTag}) already points to current head"
+                newStagingTag = lastStagingTag
+            else
+                puts "Tagging current branch for deployment to dev as '#{newDevTag}'"
+                system "git tag -a -m 'tagging current code for deployment to dev' #{newDevTag}"
+            end
+
+            set :branch, newDevTag
+        end
+
 
         desc "Mark the current code as a staging/qa release"
         task :tag_staging do
