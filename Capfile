@@ -59,8 +59,7 @@ namespace :deploy do
   # desc '[internal] Touches up the released code.'
   task :finalize_update, :except => { :no_release => true } do
     run "chmod -R g+w #{release_path}"
-    run "chmod -R +x #{release_path}/scripts"
-    run "chmod -R +x #{release_path}/scripts"
+#    run "chmod -R +x #{release_path}/scripts"
     run "chmod -R g+w #{shared_path}/cached-copy" if deploy_via == :remote_cache
   end
  
