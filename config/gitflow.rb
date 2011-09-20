@@ -96,7 +96,7 @@ Capistrano::Configuration.instance(true).load do |configuration|
             lastDevTag = last_tag_matching("dev-#{newTagDate}.*")
             if lastDevTag
                 # calculate largest serial and increment
-                lastDevTag =~ /staging-[0-9]{4}-[0-9]{2}-[0-9]{2}\.([0-9]*)/
+                lastDevTag =~ /dev-[0-9]{4}-[0-9]{2}-[0-9]{2}\.([0-9]*)/
                 newTagSerial = $1.to_i + 1
             end
             newDevTag = "dev-#{newTagDate}.#{newTagSerial}"
@@ -109,7 +109,7 @@ Capistrano::Configuration.instance(true).load do |configuration|
 
             if shaOfLastDevTag == shaOfCurrentCheckout
                 puts "Not re-tagging dev because the most recent tag (#{lastDevTag}) already points to current head"
-                newStagingTag = lastStagingTag
+                newDevTag = lastDevTag
             else
                 puts "Tagging current branch for deployment to dev as '#{newDevTag}'"
                 system "git tag -a -m 'tagging current code for deployment to dev' #{newDevTag}"
@@ -165,7 +165,7 @@ Capistrano::Configuration.instance(true).load do |configuration|
             lastProductionTag = last_tag_matching("production-#{newTagDate}.*")
             if lastProductionTag
                 # calculate largest serial and increment
-                lastProductionTag =~ /staging-[0-9]{4}-[0-9]{2}-[0-9]{2}\.([0-9]*)/
+                lastProductionTag =~ /production-[0-9]{4}-[0-9]{2}-[0-9]{2}\.([0-9]*)/
                 newTagSerial = $1.to_i + 1
             end
             newProductionTag = "production-#{newTagDate}.#{newTagSerial}"

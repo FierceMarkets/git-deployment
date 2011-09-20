@@ -1,21 +1,23 @@
 ### This file contains project-specific settings ###
  
 # The project name.
-set :application, "testapp"
+set :application, "fiercemarkets"
  
 # List the Drupal multi-site folders.  Use "default" if no multi-sites are installed.
 set :domains, ["default"]
 
-# List folders that reside outside of SVN
-set :static_dirs, ["files","public"]
+# List folders that reside outside of Git
+set :static_dirs, ["files","sites"]
  
 # username of owner of apache process
 set :apache_user, "apache"
  
 set :scm, "git"
-set :repository,  "git@github.com:FierceMarkets/git-deployment.git"
+set :repository,  "git@github.com:FierceMarkets/fiercemarkets.git"
 # run as the user logged in to SSH, including keys
-ssh_options[:forward_agent] = true
+# ssh_options[:forward_agent] = true
+# gitflow.rb sets the branch
+# set :branch, "master"
  
 # Use a remote cache to speed things up
 set :deploy_via, :remote_cache

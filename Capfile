@@ -52,8 +52,6 @@ namespace :deploy do
       # run "chown #{apache_user} -R #{release_path}/jobs/_cache"
       # run "chown #{apache_user} -R #{release_path}/jobs/uploads"
     end
-    run "rm -rf #{release_path}/europe"
-    run "ln -fs #{release_path} #{release_path}/europe"
   end
  
   # desc '[internal] Touches up the released code.'
